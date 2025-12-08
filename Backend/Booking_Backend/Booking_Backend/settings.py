@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'rest_framework',
+    'rest_framework.authtoken',
     'Room_Booking',
 ]
 
@@ -127,3 +128,15 @@ import os
 # For offline serving:
 MEDIA_URL = '/media/'  # URL path for media files
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')  # Directory to store media files
+
+AUTH_USER_MODEL= "Room_Booking.User"
+
+AUTHENTICATION_BACKENDS = ['Room_Booking.auth_backend.EmailBackend']
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.BasicAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+        'rest_framework.authentication.TokenAuthentication',
+    ],
+}

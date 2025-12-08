@@ -1,6 +1,6 @@
 from dataclasses import fields
 from rest_framework import serializers
-
+from .models import User
 
 from .models import Room,RoomImage,OccupiedDate
 
@@ -24,3 +24,14 @@ class OccupiedDateSeralizer(serializers.HyperlinkedModelSerializer):
     class Meta:
         model = OccupiedDate
         fields = ['url','id','room','date']
+
+
+from django.contrib.auth.hashers import make_password
+class UserSerializer(serializers.HyperlinkedModelSerializer):
+    class Meta:
+        model = User
+        fields = ['url', 'id', 'username','password','email','full_name']
+
+         
+    def validate_password(self, value):
+        return make_password(value)
