@@ -2,51 +2,49 @@ import React, { useContext, useEffect, useState } from "react";
 import "./AuthForm.css";
 import { UserContext } from "./UserContext";
 import { useNavigate } from "react-router-dom";
+
 const AuthForm = () => {
   const { user, setUser } = useContext(UserContext);
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     name: "",
   });
+
   const [isLogin, setIsLogin] = useState(true);
 
   useEffect(() => {
     if (user) {
       navigate("/");
     }
-  }, []);
+  }, [user, navigate]); // ✅ fixed
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
   async function handleLogin() {
-    console.log("Logging In", formData);
-    let userData = formData;
     try {
-      const response = await fetch(
-        "https://localhost:8000/login/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: userData.email,
-            password: userData.password,
-            username: userData.email,
-          }), // Payload
-        }
-      );
+      const response = await fetch("http://localhost:8000/login/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          username: formData.email,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Login failed");
       }
 
-      const data = await response.json(); // Parse the JSON response
-      console.log("Login successful:", data);
-
+      const data = await response.json();
       localStorage.setItem("user", JSON.stringify(data));
       setUser(data);
       navigate("/");
@@ -54,32 +52,27 @@ const AuthForm = () => {
       console.error("Error during login:", error);
     }
   }
+
   async function handleRegister() {
-    console.log("Registering", formData);
-    let userData = formData;
     try {
-      const response = await fetch(
-        "https://localhost:8000/register/",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            email: userData.email,
-            password: userData.password,
-            username: userData.email,
-            full_name: userData.name,
-          }),
-        }
-      );
+      const response = await fetch("http://localhost:8000/register/", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password,
+          username: formData.email,
+          full_name: formData.name,
+        }),
+      });
 
       if (!response.ok) {
         throw new Error("Register failed");
       }
 
-      const data = await response.json(); // Parse the JSON response
-      console.log("Register successful:", data);
+      const data = await response.json();
       localStorage.setItem("user", JSON.stringify(data));
       setUser(data);
       navigate("/");
@@ -90,20 +83,19 @@ const AuthForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (isLogin) {
-      await handleLogin();
-    } else {
-      await handleRegister();
-    }
+    isLogin ? handleLogin() : handleRegister();
   };
+
   const toggleAuthMode = () => {
     setIsLogin((prev) => !prev);
-    setFormData({ email: "", password: "", name: "" }); // Clear form data when switching
+    setFormData({ email: "", password: "", name: "" });
   };
+
   return (
     <div className="auth-form-container">
       <form className="auth-form" onSubmit={handleSubmit}>
         <h2>{isLogin ? "Login to Your Account" : "Create an Account"}</h2>
+
         {!isLogin && (
           <input
             type="text"
@@ -114,6 +106,7 @@ const AuthForm = () => {
             required
           />
         )}
+
         <input
           type="email"
           name="email"
@@ -122,6 +115,7 @@ const AuthForm = () => {
           onChange={handleChange}
           required
         />
+
         <input
           type="password"
           name="password"
@@ -130,8 +124,10 @@ const AuthForm = () => {
           onChange={handleChange}
           required
         />
+
         <button type="submit">{isLogin ? "Log In" : "Sign Up"}</button>
       </form>
+
       <p>
         {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
         <button className="switcher" onClick={toggleAuthMode}>
