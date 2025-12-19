@@ -12,18 +12,22 @@ class RoomImageSeralizer(serializers.ModelSerializer):
         fields = ['id','image','caption', 'room']
 
 
-class RoomSeralizer(serializers.HyperlinkedModelSerializer):
-    images = RoomImageSeralizer(many=True , read_only = True)
-    class Meta:
-        model = Room
-        fields = ['url', 'id', 'name','type','PricePerNight', 'currency','maxOccupancy', 'description','images']
-
-
 class OccupiedDateSeralizer(serializers.HyperlinkedModelSerializer):
     room = serializers.HyperlinkedRelatedField(view_name ='room-detail',queryset = Room.objects.all())
+    user = serializers.HyperlinkedRelatedField(view_name ="user-detail",queryset = User.objects.all() )
     class Meta:
         model = OccupiedDate
-        fields = ['url','id','room','date']
+        fields = ['url','id','room','date','user']
+
+
+class RoomSeralizer(serializers.HyperlinkedModelSerializer):
+    images = RoomImageSeralizer(many=True , read_only = True)
+    occupiedDates = OccupiedDateSeralizer(many = True, read_only = True)
+
+    class Meta:
+        model = Room
+        fields = ['url', 'id', 'name','type','PricePerNight', 'currency','maxOccupancy', 'description','images','occupiedDates']
+
 
 
 from django.contrib.auth.hashers import make_password
